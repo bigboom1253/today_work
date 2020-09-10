@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 import re
-from pykospacing import spacing
+from pykospacing import spacing # 설치 방법 : pip install git+https://github.com/haven-jeon/PyKoSpacing.git
 
 class Preprocessing_Insta () :
     
@@ -12,8 +12,9 @@ class Preprocessing_Insta () :
     # hashtag 추출(#포함)
     def extract_hashtag(self, content) :
         hashtag_list = []
-        if re.findall('\#[\w가-힣a-zA-Z0-9]*', str(content)):
-             hashtag_list.append(re.findall('\#[\w가-힣a-zA-Z0-9]*', str(content)))
+        re_content = re.findall('\#[\w가-힣a-zA-Z0-9]*', str(content))
+        if re_content:
+            hashtag_list.append(re_content)
         else :
             hashtag_list.append('')
         
@@ -22,20 +23,18 @@ class Preprocessing_Insta () :
     # post 추출
     def extract_post(self, content) :  
         post = re.sub('\#[\w가-힣a-zA-Z0-9]*',"",str(content)) 
-        post = re.sub("\n"," ",post)
+        post = self.del_escape(post)
         post = re.sub("\@[\w가-힣a-zA-Z0-9]*","",post)   
         return post #string type
 
     # 태그된 userID 추출
     def extract_tagged_userID(self, content) : #태그된 userID 추출의 경우 hashtag 추출과 달리 @를 제거해준 값 리턴 
-        tagged_userID_list = []
-        if re.findall('\@[\w가-힣a-zA-Z0-9]*', str(content)):
-            userID = re.findall('\@[\w가-힣a-zA-Z0-9]*', str(content))
-            tagged_userID_list.append(re.sub("@","",userID))
-        else :
-            tagged_userID_list.append('')    
-        return tagged_userID_list
-    
+        re_content = re.findall('\@[\w가-힣a-zA-Z0-9]*', str(content))
+        tmp = []
+        for userID in re_content:
+            tmp.append(re.sub("@","",userID))
+        return tmp
+
     # hashtag(#) 제거
     def remove_hash(self, hashtag_list) :
         for hashtag in hashtag_list:
@@ -44,7 +43,7 @@ class Preprocessing_Insta () :
                 tmp.append(re.sub("#","",j))
         return tmp
     
-    #pykospacing패키지를 사용한 띄어쓰기 처리
+    # pykospacing패키지를 사용한 띄어쓰기 처리
     def auto_spacing(self, content) :
         return spacing(content)
         
@@ -80,8 +79,7 @@ if __name__ == "__main__":
     print("-----------------------------------------------------------------------------------------------")
     print(pd.DataFrame({'post':post_ls, 'hashtag':hashtag_ls}))
     print("------------------------------------------------------------------------------------------------")
-    print("********이모티콘 제거 활용 예시********")
-    for post in post_ls :
+    print("*************이모지 삭제 활용 예시*************")
+    for post in post_ls : 
         print(test_class.del_emoji(post))
-    
     
